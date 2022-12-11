@@ -13,8 +13,9 @@ async def main():
     devices = api.get_devices()
     print(devices)
     ws = HomeWizardClimateWebSocket(api, devices[0])
-    await ws.async_connect()
+    asyncio.get_running_loop().run_in_executor(None, ws.connect)
 
 
 if __name__ == "__main__":
     asyncio.run(main())
+

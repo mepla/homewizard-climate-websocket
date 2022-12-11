@@ -43,3 +43,13 @@ def default_state():
             "ext_target_temperature": 0,
         }
     )
+
+
+def diff_states(first_state: HomeWizardClimateDeviceState, second_state: HomeWizardClimateDeviceState) -> str:
+    result = ""
+    for k, v in first_state.to_dict().items():
+        second_value = second_state.to_dict().get(k)
+        if v != second_value:
+            result += f"{k}: {v} -> {second_value}, "
+
+    return result
