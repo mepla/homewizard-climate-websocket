@@ -45,7 +45,10 @@ def default_state():
     )
 
 
-def diff_states(first_state: HomeWizardClimateDeviceState, second_state: HomeWizardClimateDeviceState) -> str:
+def diff_states(
+    first_state: HomeWizardClimateDeviceState,
+    second_state: HomeWizardClimateDeviceState,
+) -> str:
     result = ""
     for k, v in first_state.to_dict().items():
         second_value = second_state.to_dict().get(k)

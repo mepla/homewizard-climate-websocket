@@ -14,7 +14,8 @@ from homewizard_climate_websocket.model.climate_device import (
 )
 from homewizard_climate_websocket.model.climate_device_state import (
     HomeWizardClimateDeviceState,
-    default_state, diff_states,
+    default_state,
+    diff_states,
 )
 from homewizard_climate_websocket.ws.hw_websocket_payloads import (
     HomeWizardClimateWSPayloads,
@@ -71,13 +72,16 @@ class HomeWizardClimateWebSocket:
 
     def connect_in_thread(self) -> None:
         self._LOGGER.info(
-            f"Connecting asynchronously (daemon thread) to websocket ({API_WS_PATH})")
+            f"Connecting asynchronously (daemon thread) to websocket ({API_WS_PATH})"
+        )
         thread = threading.Thread(target=self._socket_app.run_forever)
         thread.daemon = True
         thread.start()
 
     def _send_message(self, payload: str) -> None:
-        self._LOGGER.debug(f"Sending message for command {inspect.stack()[1].function}: {payload}")
+        self._LOGGER.debug(
+            f"Sending message for command {inspect.stack()[1].function}: {payload}"
+        )
         self._socket_app.send(payload)
 
     def turn_on(self) -> None:
@@ -105,7 +109,7 @@ class HomeWizardClimateWebSocket:
         self._send_message(self._payloads.turn_off_oscillate())
 
     def _on_open(self, ws: websocket.WebSocket) -> None:
-        self._LOGGER.debug(f"Websocket opened")
+        self._LOGGER.debug("Websocket opened")
         self._send_message(self._payloads.hello())
 
     def _on_ping(self, ws: websocket.WebSocket) -> None:
@@ -119,8 +123,9 @@ class HomeWizardClimateWebSocket:
 
         if message_device and message_device != self._device.identifier:
             self._LOGGER.error(
-                f'Got a message for a different device. Expected: {self._device.identifierm}, '
-                f'got: {message_dict.get("device")}')
+                f"Got a message for a different device. Expected: "
+                f'{self._device.identifier}, got: {message_dict.get("device")}'
+            )
 
             return
 
@@ -140,18 +145,19 @@ class HomeWizardClimateWebSocket:
         self._LOGGER.debug(f"Received response update: {received_message}")
 
         if message_id == "hello" and status_code == 200:
-            self._LOGGER.debug(f"Auto responding to `hello` response with `subscribe`")
+            self._LOGGER.debug("Auto responding to `hello` response with `subscribe`")
             self._send_message(self._payloads.subscribe())
 
         elif message_id == "subscribe" and status_code == 200:
-            # We need to wait for a device update message right after subscribe, otherwise the device is deemed
-            # to be offline, so we shouldn't set initiated=True.
+            # We need to wait for a device update message right after subscribe,
+            # otherwise the device is deemed to be offline,
+            # so we shouldn't set initiated=True.
             pass
 
     def _handle_device_update(self, received_message: dict) -> None:
         if self._last_state == default_state() and not self._initialized:
             self._initialized = True
-            self._LOGGER.debug(f"Socket initialized.")
+            self._LOGGER.debug("Socket initialized.")
             if self._on_initialized:
                 self._on_initialized()
 

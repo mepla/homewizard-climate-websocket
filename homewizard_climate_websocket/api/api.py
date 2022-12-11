@@ -46,7 +46,9 @@ class HomeWizardClimateApi:
             _LOGGER.debug(f"Login succeful with token for username {self._username}")
             return self._token
         else:
-            _LOGGER.error(f"Login failed for username {self._username}, response was: {resp}")
+            _LOGGER.error(
+                f"Login failed for username {self._username}, response was: {resp}"
+            )
             raise InvalidHomewizardAuth()
 
     def get_devices(self) -> list[HomeWizardClimateDevice]:
@@ -60,8 +62,11 @@ class HomeWizardClimateApi:
             and "devices" in resp.json()
         ):
             supported_device_types = [t.value for t in HomeWizardClimateDeviceType]
-            _LOGGER.debug(f'Received {len(resp.json().get("devices"))} device(s) for user ({self._username}), '
-                          f'filtering the supported ones. supported_device_types: {supported_device_types}')
+            _LOGGER.debug(
+                f'Received {len(resp.json().get("devices"))} device(s) for user '
+                f"({self._username}), filtering the supported ones. "
+                f"supported_device_types: {supported_device_types}"
+            )
             devices_list = list(
                 map(
                     HomeWizardClimateDevice.from_dict,
@@ -72,10 +77,15 @@ class HomeWizardClimateApi:
                     ),
                 )
             )
-            _LOGGER.debug(f'Creating {len(devices_list)} device(s) for user ({self._username}): {[x.identifier for x in devices_list]}')
+            _LOGGER.debug(
+                f"Creating {len(devices_list)} device(s) for user "
+                f"({self._username}): {[x.identifier for x in devices_list]}"
+            )
             return devices_list
         else:
-            _LOGGER.error(f"Could not get user's ({self._username}) device, response was: {resp}")
+            _LOGGER.error(
+                f"Could not get user's ({self._username}) device, response was: {resp}"
+            )
             return []
 
 
