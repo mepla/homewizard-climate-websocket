@@ -27,7 +27,7 @@ class HomeWizardClimateWebSocket:
         self,
         api: HomeWizardClimateApi,
         device: HomeWizardClimateDevice,
-        on_initialized: Callable = None,
+        on_initialized: Callable[[HomeWizardClimateDevice], None] = None,
         on_state_change: Callable[[HomeWizardClimateDeviceState, str], None] = None,
     ):
         self._initialized = False
@@ -159,7 +159,7 @@ class HomeWizardClimateWebSocket:
             self._initialized = True
             self._LOGGER.debug("Socket initialized.")
             if self._on_initialized:
-                self._on_initialized()
+                self._on_initialized(self._device)
 
         self._LOGGER.debug(f"Received full device update: {received_message}")
         self._update_last_state(
