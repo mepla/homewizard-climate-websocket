@@ -15,7 +15,6 @@ async def main():
     ws = HomeWizardClimateWebSocket(api, devices[0])
     await ws.async_connect()
 
+
 if __name__ == "__main__":
     asyncio.run(main())
-
-
