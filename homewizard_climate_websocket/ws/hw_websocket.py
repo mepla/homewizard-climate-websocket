@@ -64,6 +64,9 @@ class HomeWizardClimateWebSocket:
     def connect(self):
         self._socket_app.run_forever()
 
+    async def async_connect(self):
+        self._socket_app.run_forever()
+
     def turn_on(self):
         self._socket_app.send(self._payloads.turn_on())
 
