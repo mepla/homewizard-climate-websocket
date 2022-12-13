@@ -4,8 +4,10 @@ import logging
 import threading
 from collections.abc import Callable
 from dataclasses import replace
+from enum import Enum
 
 import websocket
+from websocket._exceptions import WebSocketConnectionClosedException
 
 from homewizard_climate_websocket.api.api import HomeWizardClimateApi
 from homewizard_climate_websocket.const import API_WS_PATH
@@ -22,6 +24,13 @@ from homewizard_climate_websocket.ws.hw_websocket_payloads import (
 )
 
 
+class SocketStatus(Enum):
+    PRE_INITIALIZATION = 0
+    INITIALIZING = 1
+    INITIALIZED = 2
+    NOT_INITIALIZED = 3
+
+
 class HomeWizardClimateWebSocket:
     def __init__(
         self,
@@ -30,13 +39,14 @@ class HomeWizardClimateWebSocket:
         on_initialized: Callable[[HomeWizardClimateDevice], None] = None,
         on_state_change: Callable[[HomeWizardClimateDeviceState, str], None] = None,
     ):
-        self._initialized = False
+        self._socket_status: SocketStatus = SocketStatus.PRE_INITIALIZATION
         self._last_state: HomeWizardClimateDeviceState = default_state()
         self._api = api
         self._device = device
         self._payloads = HomeWizardClimateWSPayloads(api, device)
         self._on_initialized = on_initialized
         self._on_state_change = on_state_change
+        self._disconnect_requested = False
         self._LOGGER = logging.getLogger(f"{__name__}.{self._device.identifier}")
 
         self._socket_app = websocket.WebSocketApp(
@@ -44,11 +54,12 @@ class HomeWizardClimateWebSocket:
             on_message=self._on_message,
             on_open=self._on_open,
             on_ping=self._on_ping,
+            on_close=self._on_close,
         )
 
     @property
-    def initialized(self) -> bool:
-        return self._initialized
+    def initialized(self) -> SocketStatus:
+        return self._socket_status
 
     @property
     def device(self) -> HomeWizardClimateDevice:
@@ -67,22 +78,35 @@ class HomeWizardClimateWebSocket:
         return self.initialized and self._last_state != default_state()
 
     def connect(self) -> None:
-        self._LOGGER.info(f"Connecting synchronously to websocket ({API_WS_PATH})")
-        self._socket_app.run_forever()
+        if self._socket_status not in [
+            SocketStatus.INITIALIZED,
+            SocketStatus.INITIALIZING,
+        ]:
+            self._socket_status = SocketStatus.INITIALIZING
+            self._LOGGER.info(f"Connecting to websocket ({API_WS_PATH})")
+            self._socket_app.run_forever()
+        else:
+            self._LOGGER.info(
+                f"Can not attempt socket connection because of current "
+                f"socket status: {self._socket_status}"
+            )
 
     def connect_in_thread(self) -> None:
-        self._LOGGER.info(
-            f"Connecting asynchronously (daemon thread) to websocket ({API_WS_PATH})"
-        )
-        thread = threading.Thread(target=self._socket_app.run_forever)
+        thread = threading.Thread(target=self.connect)
         thread.daemon = True
         thread.start()
 
+    def disconnect(self) -> None:
+        self._disconnect_requested = True
+        self._socket_app.close()
+
     def _send_message(self, payload: str) -> None:
-        self._LOGGER.debug(
-            f"Sending message for command {inspect.stack()[1].function}: {payload}"
-        )
-        self._socket_app.send(payload)
+        calling_method = inspect.stack()[1].function
+        self._LOGGER.debug(f"Sending message for command {calling_method}: {payload}")
+        try:
+            self._socket_app.send(payload)
+        except WebSocketConnectionClosedException:
+            self._auto_reconnect_if_needed()
 
     def turn_on(self) -> None:
         self._send_message(self._payloads.turn_on())
@@ -139,6 +163,12 @@ class HomeWizardClimateWebSocket:
         else:
             self._LOGGER.error(f"Got unknown message of type: {message_type}")
 
+    def _on_close(self, ws: websocket.WebSocket, close_code: int, close_message: str):
+        self._LOGGER.debug(
+            f"Socket closed. Code: {close_code}, message: {close_message}"
+        )
+        self._auto_reconnect_if_needed()
+
     def _handle_response_update(self, received_message: dict) -> None:
         message_id = received_message.get("message_id")
         status_code = received_message.get("status")
@@ -155,8 +185,8 @@ class HomeWizardClimateWebSocket:
             pass
 
     def _handle_device_update(self, received_message: dict) -> None:
-        if self._last_state == default_state() and not self._initialized:
-            self._initialized = True
+        if self._socket_status == SocketStatus.INITIALIZING:
+            self._socket_status = SocketStatus.INITIALIZED
             self._LOGGER.debug("Socket initialized.")
             if self._on_initialized:
                 self._on_initialized(self._device)
@@ -184,3 +214,15 @@ class HomeWizardClimateWebSocket:
         self._last_state = new_last_state
         if self._on_state_change:
             self._on_state_change(self._last_state, diff)
+
+    def _auto_reconnect_if_needed(self, command: str = None):
+        self._socket_status = SocketStatus.NOT_INITIALIZED
+        if not self._disconnect_requested:
+            self._LOGGER.debug(
+                f"Automatically reconnecting on unwanted closed socket. {command}"
+            )
+            self.connect_in_thread()
+        else:
+            self._LOGGER.debug(
+                "Disconnect was explicitly requested, not attempting to reconnect"
+            )
