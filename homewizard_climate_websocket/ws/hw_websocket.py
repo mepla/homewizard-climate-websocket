@@ -135,9 +135,12 @@ class HomeWizardClimateWebSocket:
     def turn_off_oscillation(self) -> None:
         self._send_message(self._payloads.turn_off_oscillate())
 
+    def _hello(self):
+        self._send_message(self._payloads.hello())
+
     def _on_open(self, ws: websocket.WebSocket) -> None:
         self._LOGGER.debug("Websocket opened")
-        self._send_message(self._payloads.hello())
+        self._hello()
 
     def _on_ping(self, ws: websocket.WebSocket) -> None:
         self._socket_app.sock.pong()
@@ -186,6 +189,9 @@ class HomeWizardClimateWebSocket:
             # otherwise the device is deemed to be offline,
             # so we shouldn't set initiated=True.
             pass
+
+        elif status_code == 401:
+            self._api.login()
 
     def _handle_device_update(self, received_message: dict) -> None:
         if self._socket_status == SocketStatus.INITIALIZING:
