@@ -102,7 +102,10 @@ class HomeWizardClimateWebSocket:
 
     def _send_message(self, payload: str) -> None:
         calling_method = inspect.stack()[1].function
-        self._LOGGER.debug(f"Sending message for command {calling_method}: {payload}")
+        self._LOGGER.debug(
+            f"Sending message for command {calling_method}: "
+            f"{self._safe_payload_log(payload)}"
+        )
         try:
             self._socket_app.send(payload)
         except WebSocketConnectionClosedException:
@@ -226,3 +229,16 @@ class HomeWizardClimateWebSocket:
             self._LOGGER.debug(
                 "Disconnect was explicitly requested, not attempting to reconnect"
             )
+
+    def _safe_payload_log(self, payload: str):
+        if '"token": ' in payload:
+            payload_dict: dict = json.loads(payload)
+            if "token" in payload_dict:
+                token = payload_dict["token"]
+                safe_token = token[:10] + "..." + token[-10:]
+                payload_dict["token"] = safe_token
+                return json.dumps(payload_dict)
+            else:
+                return payload
+        else:
+            return payload
