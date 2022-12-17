@@ -1,104 +1,43 @@
 # homewizard-climate-websocket
 
-[![Build Status](https://github.com/mepla/homewizard_climate_websocket/workflows/Build%20Main/badge.svg)](https://github.com/mepla/homewizard_climate_websocket/actions)
-[![Documentation](https://github.com/mepla/homewizard_climate_websocket/workflows/Documentation/badge.svg)](https://mepla.github.io/homewizard_climate_websocket/)
-[![Code Coverage](https://codecov.io/gh/mepla/homewizard_climate_websocket/branch/main/graph/badge.svg)](https://codecov.io/gh/mepla/homewizard_climate_websocket)
-
 API/Websocket to control Homewizard Climate devices
 
 ---
 
-## Features
+This library allows you to control your Homewizard Climate devices. There are a multitude of brands that use Homewizard apps for their smart controls.
 
--   Store values and retain the prior value in memory
--   ... some other functionality
+This was developed in oder to be used in a [Home Assistant](https://www.home-assistant.io/) integration. It has not been thoroughly tested or worked with as a standalone code.
 
-## Quick Start
+### Supported Devices
+This library is in an early stage of development and only works for the following device types returned from the Homewizard Climate API:
 
-```python
-from homewizard_climate_websocket import Example
+- `heaterfan`
 
-a = Example()
-a.get_value()  # 10
+It has been tested on the following devices (even though it might work on others too):
+- [Princess Smart Heating and Cooling Tower (01.347000.01.001)](https://www.princesshome.eu/en-gb/princess-01-347000-01-001-smart-heating-and-01.347000.01.001)
+
+![](https://www.princesshome.eu/product/image/large/01.347000.01.001_3.jpg)
+
+## Quick start
+There's no separate `requirements.txt` file, the dependencies can be found and installed in `setup.py`
+
+```
+username = os.environ["HW_CLIMATE_USERNAME"]
+password = os.environ["HW_CLIMATE_PASSWORD"]
+api = HomeWizardClimateApi(username, password)
+api.login()
+devices = api.get_devices()
+ws = HomeWizardClimateWebSocket(api, devices[0])
+ws.connect_in_thread() # There's also a blocking `connect`
+time.sleep(5)
 ```
 
 ## Installation
 
-**Stable Release:** `pip install homewizard_climate_websocket`<br>
-**Development Head:** `pip install git+https://github.com/mepla/homewizard_climate_websocket.git`
-
-## Documentation
-
-For full package documentation please visit [mepla.github.io/homewizard_climate_websocket](https://mepla.github.io/homewizard_climate_websocket).
+**Stable Release (PyPi):** `pip install homewizard_climate_websocket`<br>
+**Local Development:** `pip install .`
 
 ## Development
+Any help to increase the number of supported devices is much appreciated as I only had access to the one mentioned above.
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for information related to developing the code.
-
-## The Four Commands You Need To Know
-
-1. `pip install -e .[dev]`
-
-    This will install your package in editable mode with all the required development
-    dependencies (i.e. `tox`).
-
-2. `make build`
-
-    This will run `tox` which will run all your tests in both Python 3.7
-    and Python 3.8 as well as linting your code.
-
-3. `make clean`
-
-    This will clean up various Python and build generated files so that you can ensure
-    that you are working in a clean environment.
-
-4. `make docs`
-
-    This will generate and launch a web browser to view the most up-to-date
-    documentation for your Python package.
-
-#### Additional Optional Setup Steps:
-
--   Turn your project into a GitHub repository:
-    -   Make an account on [github.com](https://github.com)
-    -   Go to [make a new repository](https://github.com/new)
-    -   _Recommendations:_
-        -   _It is strongly recommended to make the repository name the same as the Python
-            package name_
-        -   _A lot of the following optional steps are *free* if the repository is Public,
-            plus open source is cool_
-    -   After a GitHub repo has been created, run the commands listed under:
-        "...or push an existing repository from the command line"
--   Register your project with Codecov:
-    -   Make an account on [codecov.io](https://codecov.io)(Recommended to sign in with GitHub)
-        everything else will be handled for you.
--   Ensure that you have set GitHub pages to build the `gh-pages` branch by selecting the
-    `gh-pages` branch in the dropdown in the "GitHub Pages" section of the repository settings.
-    ([Repo Settings](https://github.com/mepla/homewizard_climate_websocket/settings))
--   Register your project with PyPI:
-    -   Make an account on [pypi.org](https://pypi.org)
-    -   Go to your GitHub repository's settings and under the
-        [Secrets tab](https://github.com/mepla/homewizard_climate_websocket/settings/secrets/actions),
-        add a secret called `PYPI_TOKEN` with your password for your PyPI account.
-        Don't worry, no one will see this password because it will be encrypted.
-    -   Next time you push to the branch `main` after using `bump2version`, GitHub
-        actions will build and deploy your Python package to PyPI.
-
-#### Suggested Git Branch Strategy
-
-1. `main` is for the most up-to-date development, very rarely should you directly
-   commit to this branch. GitHub Actions will run on every push and on a CRON to this
-   branch but still recommended to commit to your development branches and make pull
-   requests to main. If you push a tagged commit with bumpversion, this will also release to PyPI.
-2. Your day-to-day work should exist on branches separate from `main`. Even if it is
-   just yourself working on the repository, make a PR from your working branch to `main`
-   so that you can ensure your commits don't break the development head. GitHub Actions
-   will run on every push to any branch or any pull request from any branch to any other
-   branch.
-3. It is recommended to use "Squash and Merge" commits when committing PR's. It makes
-   each set of changes to `main` atomic and as a side effect naturally encourages small
-   well defined PR's.
-
-
-**MIT license**
-

@@ -40,7 +40,7 @@ dev_requirements = [
 requirements = [
     "dataclasses-json >= 0.5.7",
     "requests >= 2.28.0",
-    "websocket-client >= 1.4.2",
+    "websocket-client >= 1.1.0",
 ]
 
 extra_requirements = {
