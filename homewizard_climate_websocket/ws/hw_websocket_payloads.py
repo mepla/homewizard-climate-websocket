@@ -13,12 +13,10 @@ class HomeWizardClimateWSPayloads:
     def hello(self) -> str:
         return json.dumps(
             {
-                "version": "2.7.1",
                 "message_id": "hello",
                 "token": self._api.token,
                 "type": "hello",
-                "source": "climate",
-                "os": "ios",
+                "source": "https://github.com/mepla/homewizard-climate-websocket",
                 "compatibility": 4,
             }
         )
