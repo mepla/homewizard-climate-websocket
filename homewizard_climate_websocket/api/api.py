@@ -43,7 +43,7 @@ class HomeWizardClimateApi:
             and "token" in resp.json()
         ):
             self._token = resp.json().get("token")
-            _LOGGER.debug(f"Login succeful with token for username {self._username}")
+            _LOGGER.debug(f"Login successful with token for username {self._username}")
             return self._token
         else:
             _LOGGER.error(
