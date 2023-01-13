@@ -10,6 +10,7 @@ class HomeWizardClimateDeviceType(Enum):
     up by the API function get_devices"""
 
     HEATERFAN = "heaterfan"
+    INFRAREDHEATER = "infraredheater"
 
 
 @dataclass_json
