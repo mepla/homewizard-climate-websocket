@@ -36,10 +36,9 @@ class HomeWizardClimateApi:
 
         resp = requests.get(login_path, auth=(self._username, self._password))
         _LOGGER.debug(f"Login ({self._username}) status code: {resp.status_code}")
-
         if (
             resp.status_code == 200
-            and resp.headers.get("content-type") == "application/json"
+            and "application/json" in resp.headers.get("content-type")
             and "token" in resp.json()
         ):
             self._token = resp.json().get("token")
