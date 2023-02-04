@@ -57,7 +57,7 @@ class HomeWizardClimateApi:
         )
         if (
             resp.status_code == 200
-            and resp.headers.get("content-type") == "application/json"
+            and "application/json" in resp.headers.get("content-type")
             and "devices" in resp.json()
         ):
             supported_device_types = [t.value for t in HomeWizardClimateDeviceType]
