@@ -135,6 +135,9 @@ class HomeWizardClimateWebSocket:
     def turn_off_oscillation(self) -> None:
         self._send_message(self._payloads.turn_off_oscillate())
 
+    def set_mode(self, mode: str) -> None:
+        self._send_message(self._payloads.set_mode(mode))
+
     def _hello(self):
         self._send_message(self._payloads.hello())
 
