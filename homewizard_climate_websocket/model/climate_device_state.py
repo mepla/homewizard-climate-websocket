@@ -51,8 +51,10 @@ def diff_states(
 ) -> str:
     result = ""
     for k, v in first_state.to_dict().items():
-        second_value = second_state.to_dict().get(k)
-        if v != second_value:
-            result += f"{k}: {v} -> {second_value}, "
-
+        # fix for HEATER type
+        if k in second_state.to_dict():
+            second_value = second_state.to_dict().get(k)
+            if v != second_value:
+                result += f"{k}: {v} -> {second_value}, "
+    
     return result
