@@ -135,6 +135,9 @@ class HomeWizardClimateWebSocket:
     def turn_off_oscillation(self) -> None:
         self._send_message(self._payloads.turn_off_oscillate())
 
+    def set_mode(self, mode: str) -> None:
+        self._send_message(self._payloads.set_mode(mode))
+
     def _hello(self):
         self._send_message(self._payloads.hello())
 
@@ -201,6 +204,28 @@ class HomeWizardClimateWebSocket:
                 self._on_initialized(self._device)
 
         self._LOGGER.debug(f"Received full device update: {received_message}")
+
+        if 'fan_speed' not in state:                                     
+            state['fan_speed'] = 0                                                  
+        if 'oscillate' not in state:                                              
+            state['oscillate'] = False                                     
+        if 'error' not in state:                                                      
+            state['error'] = []                                        
+        if 'heat_status' not in state:                                        
+            state['heat_status'] = "idle"                                     
+        if 'vent_heat' not in state:                                                  
+            state['vent_heat'] = False                                         
+        if 'silent' not in state:                                         
+            state['silent'] = False                                              
+        if 'heater' not in state:                   
+            state['heater'] = False                     
+        if 'ext_mode' not in state:                                   
+            state['ext_mode'] = []                                       
+        if 'ext_current_temperature' not in state:                       
+            state['ext_current_temperature'] = 0                                    
+        if 'ext_target_temperature' not in state:                                 
+            state['ext_target_temperature'] = 0 
+
         self._update_last_state(
             HomeWizardClimateDeviceState.from_dict(received_message.get("state"))
         )
