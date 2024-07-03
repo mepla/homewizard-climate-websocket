@@ -5,6 +5,7 @@ import threading
 from collections.abc import Callable
 from dataclasses import replace
 from enum import Enum
+from ssl import SSLEOFError
 
 import websocket
 from websocket._exceptions import WebSocketConnectionClosedException
