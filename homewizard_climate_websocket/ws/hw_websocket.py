@@ -108,7 +108,7 @@ class HomeWizardClimateWebSocket:
         )
         try:
             self._socket_app.send(payload)
-        except WebSocketConnectionClosedException:
+        except (WebSocketConnectionClosedException, SSLEOFError):
             self._auto_reconnect_if_needed()
 
     def turn_on(self) -> None:
