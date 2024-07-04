@@ -5,7 +5,7 @@ import threading
 from collections.abc import Callable
 from dataclasses import replace
 from enum import Enum
-from ssl import SSLEOFError
+from ssl import SSLError
 
 import websocket
 from websocket._exceptions import WebSocketConnectionClosedException
@@ -109,7 +109,7 @@ class HomeWizardClimateWebSocket:
         )
         try:
             self._socket_app.send(payload)
-        except (WebSocketConnectionClosedException, SSLEOFError):
+        except (WebSocketConnectionClosedException, SSLError):
             self._auto_reconnect_if_needed()
 
     def turn_on(self) -> None:
