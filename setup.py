@@ -88,6 +88,6 @@ setup(
     url="https://github.com/mepla/homewizard_climate_websocket",
     # Do not edit this string manually, always use bumpversion
     # Details in CONTRIBUTING.rst
-    version="0.0.11",
+    version="0.0.12",
     zip_safe=False,
 )
