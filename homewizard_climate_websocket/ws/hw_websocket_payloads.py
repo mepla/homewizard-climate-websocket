@@ -114,6 +114,16 @@ class HomeWizardClimateWSPayloads:
             }
         )
 
+    def set_mode(self, mode: str) -> str:
+        return json.dumps(
+            {
+                "device": self._device.identifier,
+                "type": "json_patch",
+                "patch": [
+                    {"op": "replace", "path": "/state/mode", "value": mode}
+                ],
+            }
+        )
 
 class HomeWizardClimateStatePath(Enum):
     CURRENT_TEMP = "/state/current_temperature"
